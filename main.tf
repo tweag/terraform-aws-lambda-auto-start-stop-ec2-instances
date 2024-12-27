@@ -1,19 +1,10 @@
 # Get actual region
 data "aws_region" "this" {}
 
-# Build Lambda archive
-resource "null_resource" "package_lambda_code" {
-  provisioner "local-exec" {
-    command = "make -C ${path.module}/lambda_function build"
-  }
-}
-
 data "archive_file" "this" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda_function/dist/"
+  source_dir  = "${path.module}/lambda_function/src/"
   output_path = "${path.module}/dist/lambda-code.zip"
-
-  depends_on = [null_resource.package_lambda_code]
 }
 
 # Allow execution of Lambda from CloudWatch
@@ -158,7 +149,6 @@ resource "aws_lambda_function" "this" {
 
   environment {
     variables = {
-      PYTHONPATH               = "./dist-packages"
       PARAM_ACTION             = var.action
       PARAM_RESOURCE_TAG_KEY   = var.lookup_resource_tag.key
       PARAM_RESOURCE_TAG_VALUE = var.lookup_resource_tag.value
