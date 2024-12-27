@@ -151,7 +151,7 @@ resource "aws_lambda_function" "this" {
   function_name    = var.name
   role             = var.custom_iam_role_arn == null ? aws_iam_role.this[0].arn : var.custom_iam_role_arn
   handler          = "main.lambda_handler"
-  runtime          = "python3.8"
+  runtime          = "python3.12"
   memory_size      = 128
   timeout          = 300
   tags             = var.tags
