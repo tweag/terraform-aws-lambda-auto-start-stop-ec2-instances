@@ -1,7 +1,7 @@
 # Get actual region
 data "aws_region" "this" {}
 
-resource "archive_file" "this" {
+data "archive_file" "this" {
   type        = "zip"
   output_path = "${path.module}/dist/lambda-code.zip"
   source_dir  = "${path.module}/lambda_function/src/"
@@ -138,8 +138,8 @@ resource "aws_iam_role" "this" {
 
 # The lambda execution.
 resource "aws_lambda_function" "this" {
-  filename                       = archive_file.this.output_path
-  source_code_hash               = archive_file.this.output_base64sha256
+  filename                       = data.archive_file.this.output_path
+  source_code_hash               = data.archive_file.this.output_base64sha256
   function_name                  = var.name
   role                           = var.custom_iam_role_arn == null ? aws_iam_role.this[0].arn : var.custom_iam_role_arn
   handler                        = "main.lambda_handler"
