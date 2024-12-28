@@ -138,15 +138,22 @@ resource "aws_iam_role" "this" {
 
 # The lambda execution.
 resource "aws_lambda_function" "this" {
-  filename         = archive_file.this.output_path
-  source_code_hash = archive_file.this.output_base64sha256
-  function_name    = var.name
-  role             = var.custom_iam_role_arn == null ? aws_iam_role.this[0].arn : var.custom_iam_role_arn
-  handler          = "main.lambda_handler"
-  runtime          = "python3.12"
-  memory_size      = 128
-  timeout          = 300
-  tags             = var.tags
+  filename                       = archive_file.this.output_path
+  source_code_hash               = archive_file.this.output_base64sha256
+  function_name                  = var.name
+  role                           = var.custom_iam_role_arn == null ? aws_iam_role.this[0].arn : var.custom_iam_role_arn
+  handler                        = "main.lambda_handler"
+  runtime                        = "python3.12"
+  memory_size                    = 128
+  reserved_concurrent_executions = 1
+  timeout                        = 300
+  tags                           = var.tags
+  kms_key_arn                    = var.kms_key_id
+
+  tracing_config {
+    mode = "Active"
+  }
+
 
   environment {
     variables = {
