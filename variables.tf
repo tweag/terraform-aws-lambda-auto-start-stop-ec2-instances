@@ -39,3 +39,15 @@ variable "lookup_resource_regions" {
   type        = list(string)
   default     = null
 }
+
+variable "retention_in_days" {
+  type        = number
+  description = "The number of days to retain the logs."
+  default     = 7
+}
+
+variable "kms_key_id" {
+  type        = string
+  description = "Optional KMS key ID used to encrypt the logs."
+  default     = null
+}

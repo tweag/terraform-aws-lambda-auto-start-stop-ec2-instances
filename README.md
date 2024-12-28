@@ -47,28 +47,65 @@ module "start_ec2_instances" {
   }
 }
 ```
+<!-- BEGIN_TF_DOCS -->
+## Requirements
 
-## Module Input Variables
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.0 |
 
-| Name                    | Type                             | Default    | Description                                                                                                                 |
-| ----------------------- | -------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
-| schedule_expression     | string                           |  `Not Set` |  The CloudWatch Schedule Expression to trigger the Lambda. Can be a CRON expression for example. _Required_.                |
-| name                    | string                           |  `Not Set` |  The name of the lambda to create. _Required_.                                                                              |
-| tags                    | map(string)                      |  `{}`      |  The tags to assign to the created resources.                                                                               |
-| custom_iam_role_arn     | string                           |  `Not Set` |  The IAM role to assign to the Lambda. If not specified, a role with appropriate permissions will be created.               |
-| action                  | string                           |  `Not Set` |  The action to perform. Valid values are `enable`,`disable`. (`start`, `stop` are supported aliases as well). **Required**. |
-| lookup_resource_tag     | object{key=string, value=string} |  `Not Set` |  The tags to filter on to look for EC2 instances within the regions. **Required**.                                          |
-| lookup_resource_regions | list(string)                     |  `Not Set` | Look for EC2 instances in the specified regions. By default, it uses the region in which the lambda is deployed.            |
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_archive"></a> [archive](#provider\_archive) | 2.7.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.82.2 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_cloudwatch_event_rule.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
+| [aws_cloudwatch_event_target.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
+| [aws_cloudwatch_log_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_iam_role.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.this_autoscaling_describe_instances](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy.this_ec2_start_instances](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy.this_ec2_stop_instances](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy.this_logs_put_events](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_lambda_function.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
+| [aws_lambda_permission.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
+| [archive_file.this](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
+| [aws_region.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_action"></a> [action](#input\_action) | The action which the lambda needs to perform. | `string` | n/a | yes |
+| <a name="input_custom_iam_role_arn"></a> [custom\_iam\_role\_arn](#input\_custom\_iam\_role\_arn) | A custom IAM role to execute the lambda. If not specified, a role will be created. | `string` | `null` | no |
+| <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | Optional KMS key ID used to encrypt the logs. | `string` | `null` | no |
+| <a name="input_lookup_resource_regions"></a> [lookup\_resource\_regions](#input\_lookup\_resource\_regions) | A list of regions in which the resources will be looked for. By default, use the current region. | `list(string)` | `null` | no |
+| <a name="input_lookup_resource_tag"></a> [lookup\_resource\_tag](#input\_lookup\_resource\_tag) | The tag to use to search for EC2 instances. | `object({ key = string, value = string })` | n/a | yes |
+| <a name="input_name"></a> [name](#input\_name) | The name of the lambda to create. | `string` | n/a | yes |
+| <a name="input_retention_in_days"></a> [retention\_in\_days](#input\_retention\_in\_days) | The number of days to retain the logs. | `number` | `7` | no |
+| <a name="input_schedule_expression"></a> [schedule\_expression](#input\_schedule\_expression) | Define the schedule expression to trigger the lambda. | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags to associate to the lambda. | `map(string)` | `{}` | no |
 
 ## Outputs
 
-| Name                  | Type   | Description                                                                                  |
-| --------------------- | ------ | -------------------------------------------------------------------------------------------- |
-| lambda_function_name  | string |  The Lambda function name.                                                                   |
-| lambda_arn            | ARN    |  The Lambda Amazon Resource Identifier.                                                      |
-| lambda_iam_role_arn   | ARN    |  The IAM Role Amazon Resource Identifier assigned to the Lambda.                             |
-| lambda_log_group_name | string |  The CloudWatch Log Group name in which the Lambda push logs.                                |
-| lambda_log_group_arn  | ARN    |  The CloudWatch Log Group Amazon Resource Identifier assigned in which the Lambda push logs. |
+| Name | Description |
+|------|-------------|
+| <a name="output_lambda_arn"></a> [lambda\_arn](#output\_lambda\_arn) | The Lambda ARN. |
+| <a name="output_lambda_function_name"></a> [lambda\_function\_name](#output\_lambda\_function\_name) | The Lambda Function name. |
+| <a name="output_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#output\_lambda\_iam\_role\_arn) | The Lambda IAM role ARN. |
+| <a name="output_lambda_log_group_arn"></a> [lambda\_log\_group\_arn](#output\_lambda\_log\_group\_arn) | The Lambda Log Group ARN. |
+| <a name="output_lambda_log_group_name"></a> [lambda\_log\_group\_name](#output\_lambda\_log\_group\_name) | The name of the Lambda Log Group. |
+<!-- END_TF_DOCS -->
 
 ## Contributing
 

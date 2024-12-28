@@ -1,19 +1,10 @@
 # Get actual region
 data "aws_region" "this" {}
 
-# Build Lambda archive
-resource "null_resource" "package_lambda_code" {
-  provisioner "local-exec" {
-    command = "make -C ${path.module}/lambda_function build"
-  }
-}
-
 data "archive_file" "this" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda_function/dist/"
   output_path = "${path.module}/dist/lambda-code.zip"
-
-  depends_on = [null_resource.package_lambda_code]
+  source_dir  = "${path.module}/lambda_function/src/"
 }
 
 # Allow execution of Lambda from CloudWatch
@@ -39,8 +30,9 @@ resource "aws_lambda_permission" "this" {
 # Create a LogGroup for the Lambda
 resource "aws_cloudwatch_log_group" "this" {
   name              = "/aws/lambda/${var.name}"
-  retention_in_days = 7
+  retention_in_days = var.retention_in_days
   tags              = var.tags
+  kms_key_id        = var.kms_key_id
 }
 
 # The lambda IAM role.
@@ -146,19 +138,25 @@ resource "aws_iam_role" "this" {
 
 # The lambda execution.
 resource "aws_lambda_function" "this" {
-  filename         = data.archive_file.this.output_path
-  source_code_hash = data.archive_file.this.output_base64sha256
-  function_name    = var.name
-  role             = var.custom_iam_role_arn == null ? aws_iam_role.this[0].arn : var.custom_iam_role_arn
-  handler          = "main.lambda_handler"
-  runtime          = "python3.8"
-  memory_size      = 128
-  timeout          = 300
-  tags             = var.tags
+  filename                       = data.archive_file.this.output_path
+  source_code_hash               = data.archive_file.this.output_base64sha256
+  function_name                  = var.name
+  role                           = var.custom_iam_role_arn == null ? aws_iam_role.this[0].arn : var.custom_iam_role_arn
+  handler                        = "main.lambda_handler"
+  runtime                        = "python3.12"
+  memory_size                    = 128
+  reserved_concurrent_executions = 1
+  timeout                        = 300
+  tags                           = var.tags
+  kms_key_arn                    = var.kms_key_id
+
+  tracing_config {
+    mode = "Active"
+  }
+
 
   environment {
     variables = {
-      PYTHONPATH               = "./dist-packages"
       PARAM_ACTION             = var.action
       PARAM_RESOURCE_TAG_KEY   = var.lookup_resource_tag.key
       PARAM_RESOURCE_TAG_VALUE = var.lookup_resource_tag.value

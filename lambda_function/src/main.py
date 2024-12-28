@@ -90,7 +90,7 @@ class CWScheduledEventManageEC2State(LambdaFunctionBase):
         elif self.ACTION in ['disable', 'stop']:
             ec2_instance_state = 'running'
         else:
-            raise Exception('Unexpected action.')
+            raise ValueError('Unexpected action.')
 
         for aws_region_name in self.AWS_REGIONS:
             self.logger.info('> Searching EC2 instances in region %s having tag %s=%s and state=%s.',

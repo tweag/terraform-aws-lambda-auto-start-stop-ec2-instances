@@ -45,6 +45,12 @@ format:
 	terraform fmt; \
 	make -C lambda_function format
 
+#docs: @ Update README with terraform-docs
+docs:
+	@exec >&2; \
+	echo "> Updating docs."; \
+	terraform-docs markdown . --output-file README.md
+
 #lint: @ Lint package
 lint:
 	@exec >&2; \
