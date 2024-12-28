@@ -35,7 +35,7 @@ class LambdaFunctionBase:
         """ Handle uncatched exceptions. """
         exception_type, exception_value, exception_traceback = sys.exc_info()
         error_traces = traceback.format_exception(exception_type, exception_value, exception_traceback)
-        error_message = '{} {}'.format(exception_type.__name__, str(exception_value))
+        error_message = f'{exception_type.__name__} {str(exception_value)}'
         return {
             'statusCode': 500,
             'body': {
